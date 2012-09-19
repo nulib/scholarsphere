@@ -95,6 +95,13 @@ GEM
       activesupport (>= 2.0)
     builder (3.0.0)
     cancan (1.6.8)
+    capistrano (2.13.3)
+      highline
+      net-scp (>= 1.0.0)
+      net-sftp (>= 2.0.0)
+      net-ssh (>= 2.0.14)
+      net-ssh-gateway (>= 1.1.0)
+    capistrano_colors (0.5.5)
     capybara (1.1.2)
       mime-types (>= 1.16)
       nokogiri (>= 1.3.3)
@@ -174,6 +181,7 @@ GEM
     gyoku (0.4.6)
       builder (>= 2.1.2)
     headless (0.3.1)
+    highline (1.6.15)
     hike (1.2.1)
     httpi (1.1.1)
       rack
@@ -242,6 +250,13 @@ GEM
     nest (1.1.1)
       redis
     net-ldap (0.3.1)
+    net-scp (1.0.4)
+      net-ssh (>= 1.99.1)
+    net-sftp (2.0.5)
+      net-ssh (>= 2.0.9)
+    net-ssh (2.5.2)
+    net-ssh-gateway (1.1.0)
+      net-ssh (>= 1.99.1)
     noid (0.5.5)
       backports
     nokogiri (1.5.5)
@@ -344,6 +359,8 @@ GEM
       rest-client
       savon
     rubyzip (0.9.9)
+    rvm-capistrano (1.2.7)
+      capistrano (>= 2.0.0)
     sanitize (2.0.3)
       nokogiri (>= 1.4.4, < 1.6)
     sass (3.2.1)
@@ -427,6 +444,8 @@ DEPENDENCIES
   bcrypt-ruby
   blacklight (= 3.5.0)
   blacklight_advanced_search (= 1.2.4)
+  capistrano (= 2.13.3)
+  capistrano_colors (= 0.5.5)
   capybara
   clamav (= 0.4.1)
   coffee-rails (= 3.2.2)
@@ -463,6 +482,7 @@ DEPENDENCIES
   rspec-rails (>= 2.4.0)
   ruby-prof
   rubydora (= 0.5.10)
+  rvm-capistrano
   sass-rails (= 3.2.5)
   selenium-webdriver
   sitemap (= 0.3.2)
