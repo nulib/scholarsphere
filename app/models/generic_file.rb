@@ -273,7 +273,8 @@ class GenericFile < ActiveFedora::Base
   end
 
   def to_solr(solr_doc={}, opts={})
-    super(solr_doc, opts)
+    #super(solr_doc, opts)
+    super(solr_doc, :index_full_text => true)
     solr_doc["label_t"] = self.label
     solr_doc["noid_s"] = noid
     solr_doc["file_format_t"] = file_format

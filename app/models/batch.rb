@@ -37,7 +37,8 @@ class Batch < ActiveFedora::Base
   end
 
   def to_solr(solr_doc={}, opts={})
-    super(solr_doc, opts)
+    #super(solr_doc, opts)
+    super(solr_doc, :index_full_text => true)
     solr_doc["noid_s"] = noid
     return solr_doc
   end

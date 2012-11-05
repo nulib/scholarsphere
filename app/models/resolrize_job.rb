@@ -16,6 +16,8 @@ class ResolrizeJob
   @queue = :resolrize
 
   def self.perform
-    Solrizer::Fedora::Solrizer.new.solrize_objects(:suppress_errors => false)
+    #Solrizer::Fedora::Solrizer.new.solrize_objects(:suppress_errors => false)
+    full_text_solrizer = Solrizer::Fedora::Solrizer.new(:index_full_text => true)
+    full_text_solrizer.solrize_objects(:suppress_errors => false)
   end
 end
