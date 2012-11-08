@@ -148,8 +148,17 @@ class GenericFile < ActiveFedora::Base
     self.characterization.content = self.content.extract_metadata
     self.append_metadata
     self.filename = self.label
-    self.terms_of_service = '1'
+    self.terms_of_service = '1'    
+    extract_content
     save unless self.new_object?
+  end
+
+  def extract_content
+    url = Blacklight.solr_config[:url] ? Blacklight.solr_config[:url] : Blacklight.solr_config["url"] ? Blacklight.solr_config["url"] : Blacklight.solr_config[:fulltext] ? Blacklight.solr_config[:fulltext]["url"] : Blacklight.solr_config[:default]["url"] 
+    uri = URI(url+'/update/extract?&extractOnly=true&wt=ruby')
+    req = Net::HTTP.new(uri.host, uri.port)
+    resp = req.post("http://localhost:8983/solr/development/update/extract?&extractOnly=true&wt=ruby&extractFormat=text", self.content.content, {'Content-type'=>self.mime_type+';charset=utf-8'})
+    @text = eval(resp.body)[""]
   end
 
   def related_files
@@ -273,12 +282,13 @@ class GenericFile < ActiveFedora::Base
   end
 
   def to_solr(solr_doc={}, opts={})
-    #super(solr_doc, opts)
-    super(solr_doc, :index_full_text => true)
+    super(solr_doc, opts)
     solr_doc["label_t"] = self.label
     solr_doc["noid_s"] = noid
     solr_doc["file_format_t"] = file_format
     solr_doc["file_format_facet"] = solr_doc["file_format_t"]
+    solr_doc["text"] = @text 
+    logger.warn "Text =  #{solr_doc['text']}"
     # remap dates as a valid xml date not to_s
     solr_doc['generic_file__date_uploaded_dt'] = Time.parse(date_uploaded).utc.to_s.sub(' ','T').sub(' UTC','Z') rescue Time.new(date_uploaded).utc.to_s.sub(' ','T').sub(' UTC','Z') unless date_uploaded.blank?
     solr_doc['generic_file__date_modified_dt'] = Time.parse(date_modified).utc.to_s.sub(' ','T').sub(' UTC','Z') rescue Time.new(date_modified).utc.to_s.sub(' ','T').sub(' UTC','Z') unless date_modified.blank?
