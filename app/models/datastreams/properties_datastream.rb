@@ -20,6 +20,8 @@ class PropertiesDatastream < ActiveFedora::NokogiriDatastream
     t.depositor :xmlns => '', :namespace_prefix => nil
     # This is where we put the relative path of the file if submitted as a folder
     t.relative_path :xmlns => '', :namespace_prefix => nil
+    # This is where we put the extracted text of the file
+    t.text_content :xmlns => '', :namespace_prefix => nil
   end
 
   def self.xml_template

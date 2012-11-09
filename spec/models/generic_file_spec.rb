@@ -452,6 +452,11 @@ describe GenericFile do
         @myfile.format_label.should == ["Portable Document Format"]
         @myfile.title.should include("Microsoft Word - sample.pdf.docx")
       end
+      it "should include content extraction in characterization job" do
+        @myfile.text_content.nil?.should be_false
+        @myfile.text_content.should == "\n        \n  \n \n \n \nThis PDF file was created using CutePDF. \nwww.cutepdf.com \n\n"
+      end
+      
     end
   end
   describe "label" do

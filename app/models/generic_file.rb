@@ -27,11 +27,12 @@ class GenericFile < ActiveFedora::Base
   has_metadata :name => "properties", :type => PropertiesDatastream
   has_metadata :name => "rightsMetadata", :type => ParanoidRightsDatastream
   has_file_datastream :name => "content", :type => FileContentDatastream
+  has_file_datastream :name => "text_content", :type => FileContentDatastream
   has_file_datastream :name => "thumbnail", :type => FileContentDatastream
 
   belongs_to :batch, :property => :is_part_of
 
-  delegate_to :properties, [:relative_path, :depositor], :unique => true
+  delegate_to :properties, [:relative_path, :depositor, :text_content], :unique => true
   delegate_to :descMetadata, [:date_uploaded, :date_modified], :unique => true
   delegate_to :descMetadata, [:related_url, :based_near, :part_of, :creator,
                               :contributor, :title, :tag, :description, :rights,
@@ -74,7 +75,6 @@ class GenericFile < ActiveFedora::Base
 
   def self.get_label(key)
      label = @@FIELD_LABEL_MAP[key]
-     puts "label = #{label}"
      label = key.gsub('_',' ').titleize if label.blank?
      return label
   end
@@ -155,10 +155,18 @@ class GenericFile < ActiveFedora::Base
 
   def extract_content
     url = Blacklight.solr_config[:url] ? Blacklight.solr_config[:url] : Blacklight.solr_config["url"] ? Blacklight.solr_config["url"] : Blacklight.solr_config[:fulltext] ? Blacklight.solr_config[:fulltext]["url"] : Blacklight.solr_config[:default]["url"] 
-    uri = URI(url+'/update/extract?&extractOnly=true&wt=ruby')
+    uri = URI(url+'/update/extract?&extractOnly=true&wt=ruby&extractFormat=xml')
     req = Net::HTTP.new(uri.host, uri.port)
-    resp = req.post("http://localhost:8983/solr/development/update/extract?&extractOnly=true&wt=ruby&extractFormat=text", self.content.content, {'Content-type'=>self.mime_type+';charset=utf-8'})
-    @text = eval(resp.body)[""]
+    mime_type = self.mime_type.blank? ? '' : self.mime_type
+    begin
+      resp = req.post(uri.to_s, self.content.content, {'Content-type'=>mime_type+';charset=utf-8'})
+      rtext = eval(resp.body)[""]
+      doc = Nokogiri::XML::Document.parse(rtext)
+      self.text_content = doc.xpath('//xmlns:body')[0].text()
+    rescue => e
+      logger.error "Error extracting text for #{self.pid} #{e.inspect}"
+    end
+    #todo do we want to get any of the other metadata, might be nice from things like pictures
   end
 
   def related_files
@@ -287,8 +295,7 @@ class GenericFile < ActiveFedora::Base
     solr_doc["noid_s"] = noid
     solr_doc["file_format_t"] = file_format
     solr_doc["file_format_facet"] = solr_doc["file_format_t"]
-    solr_doc["text"] = @text 
-    logger.warn "Text =  #{solr_doc['text']}"
+    solr_doc["text"] =  self.text_content
     # remap dates as a valid xml date not to_s
     solr_doc['generic_file__date_uploaded_dt'] = Time.parse(date_uploaded).utc.to_s.sub(' ','T').sub(' UTC','Z') rescue Time.new(date_uploaded).utc.to_s.sub(' ','T').sub(' UTC','Z') unless date_uploaded.blank?
     solr_doc['generic_file__date_modified_dt'] = Time.parse(date_modified).utc.to_s.sub(' ','T').sub(' UTC','Z') rescue Time.new(date_modified).utc.to_s.sub(' ','T').sub(' UTC','Z') unless date_modified.blank?
