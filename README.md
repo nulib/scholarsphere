@@ -1,4 +1,4 @@
-﻿# ScholarSphere
+﻿# ScholarSphere test
 
 ScholarSphere is a Ruby on Rails application utilizing the Blacklight
 and Hydra-head gems for integration with the search & indexing system,
